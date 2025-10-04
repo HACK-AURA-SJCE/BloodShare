@@ -1,5 +1,5 @@
 const Hospital = require("../models/Hospital");
-const bloodTypes = require("../constants/bloodTypes"); 
+const bloodTypes = require("../constants/bloodTypes");
 const Emergency = require("../models/Emergency_notification");
 const Donor = require("../models/Donor");
 
@@ -27,7 +27,7 @@ module.exports.renderUpdateStock = async (req, res) => {
 };
 
 
-module.exports.updateStock = async (req, res) => { 
+module.exports.updateStock = async (req, res) => {
   const { bloodGroup, units } = req.body;
   const hospital = await Hospital.findById(req.user.refId);
 
@@ -63,7 +63,7 @@ module.exports.createEmergency = async (req, res) => {
   const hospital = await Hospital.findById(req.user.refId);
   if (!hospital) {
     console.log("❌ Hospital not found");
-    return res.status(404).send("Hospital not found"); 
+    return res.status(404).send("Hospital not found");
   }
 
   const emergency = new Emergency({
@@ -79,19 +79,19 @@ module.exports.createEmergency = async (req, res) => {
   const nearbyDonors = await Donor.find({
     location: {
       $geoWithin: {
-        $centerSphere: [hospital.location.coordinates, 5 / 6378.1],
+        $centerSphere: [hospital.location.coordinates, 20 / 6378.1],
       },
     },
     bloodGroup,
     active: true,
   });
 
- 
+
   const nearbyHospitals = await Hospital.find({
     _id: { $ne: hospital._id },
     location: {
       $geoWithin: {
-        $centerSphere: [hospital.location.coordinates, 5 / 6378.1],
+        $centerSphere: [hospital.location.coordinates, 20 / 6378.1],
       },
     },
   });
@@ -167,7 +167,7 @@ module.exports.renderBloodCampForm = async (req, res) => {
   const hospitalId = req.user.refId;
   const hospital = await Hospital.findById(hospitalId);
 
- 
+
   const hospitalLat = hospital.location.coordinates[1];
   const hospitalLng = hospital.location.coordinates[0];
 
@@ -213,21 +213,21 @@ module.exports.createBloodCamp = async (req, res) => {
 module.exports.addDonation = async (req, res) => {
   try {
     const { aadhar, bloodGroup, units } = req.body;
-    const hospitalId = req.user.refId; 
+    const hospitalId = req.user.refId;
 
     if (!aadhar || !bloodGroup) {
       console.log("Aadhar and blood group are required");
       return res.redirect("/hospital/donations");
     }
 
-  
+
     const donor = await Donor.findOne({ aadhar });
 
-   
+
     let donation = await Donation.findOne({ aadhar });
 
     if (donation) {
-      
+
       donation.totalDonations += Number(units);
       donation.lastDonationDate = new Date();
       donation.donationHistory.push({
@@ -242,7 +242,7 @@ module.exports.addDonation = async (req, res) => {
 
       await donation.save();
     } else {
-      
+
       donation = new Donation({
         aadhar,
         donor: donor ? donor._id : undefined,
@@ -287,7 +287,7 @@ module.exports.listDonations = async (req, res) => {
     if (req.headers['x-client'] === 'React') {
       return res.json({ donations, bloodTypes });
     }
-    res.render("hospital/donations", { donations, user: req.user , bloodTypes });
+    res.render("hospital/donations", { donations, user: req.user, bloodTypes });
   } catch (err) {
     console.error("Error fetching donations:", err);
     res.redirect("/hospital/dashboard");

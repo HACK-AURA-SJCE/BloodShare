@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { Bell, Heart, LogOut, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, LogOut, Menu, X, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 // Updated quick link menu including Home
@@ -41,7 +41,7 @@ const Navbar = () => {
               <Heart className="w-6 h-6 text-white" fill="white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">BloodConnect</h1>
+              <h1 className="text-xl font-bold text-gray-900">BloodShare</h1>
               <p className="text-xs text-gray-500">Save Lives Together</p>
             </div>
           </Link>
