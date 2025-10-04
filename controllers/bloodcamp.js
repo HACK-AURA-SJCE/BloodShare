@@ -4,12 +4,12 @@ const Hospital = require("../models/Hospital");
 
 
 
-// Show all upcoming camps
+
 module.exports.listCamps = async (req, res) => {
   try {
     const camps = await BloodCamp.find()
       .populate("Hospital", "name email mobile")
-      .sort({ date: 1 }); // nearest upcoming camps first
+      .sort({ date: 1 }); 
 
     if (req.headers['x-client'] === 'React') {
       return res.json({ camps });
@@ -22,7 +22,7 @@ module.exports.listCamps = async (req, res) => {
   }
 };
 
-// Show details of a single camp
+
 module.exports.showCamp = async (req, res) => {
   try {
     const { id } = req.params;

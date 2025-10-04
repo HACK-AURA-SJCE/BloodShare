@@ -11,7 +11,7 @@ module.exports.renderSignUpForm = (req, res) => {
   res.render("users/signup", { role });
 };
 
-// Helper function to link past donations
+
 async function linkPastDonations(aadhar, donorId) {
   try {
     await Donation.updateMany(
@@ -49,7 +49,7 @@ module.exports.signup = async (req, res, next) => {
 
       await newUser.save();
 
-      // Link past donations using Aadhar
+      
       await linkPastDonations(aadhar, newUser._id);
 
     } else if (role === "Hospital") {
@@ -66,7 +66,7 @@ module.exports.signup = async (req, res, next) => {
       await newUser.save();
     }
 
-    // Register authentication
+
     const authUser = new Auth({ email, role, refId: newUser._id });
     const registeredUser = await Auth.register(authUser, password);
 
@@ -96,7 +96,7 @@ module.exports.renderLoginForm = (req, res) => {
 
 
 
-// Handle login
+
 module.exports.login = async (req, res) => {
   const { email } = req.body;
 
@@ -125,7 +125,7 @@ module.exports.login = async (req, res) => {
   }
 };
 
-// Handle logout
+
 module.exports.logout = (req, res, next) => {
   req.logout((err) => {
     if (err)
@@ -137,7 +137,7 @@ module.exports.logout = (req, res, next) => {
   });
 };
 
-// Return current session user for React client
+
 module.exports.me = async (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({ authenticated: false });

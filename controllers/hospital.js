@@ -1,5 +1,5 @@
 const Hospital = require("../models/Hospital");
-const bloodTypes = require("../constants/bloodTypes"); // <-- require here
+const bloodTypes = require("../constants/bloodTypes"); 
 const Emergency = require("../models/Emergency_notification");
 const Donor = require("../models/Donor");
 
@@ -8,7 +8,7 @@ const BloodCamp = require("../models/Blood_camp");
 const Donation = require("../models/Donation");
 const Notification = require("../models/notification");
 
-// View current stock
+
 module.exports.viewStocks = async (req, res) => {
   const hospital = await Hospital.findById(req.user.refId);
   if (req.headers['x-client'] === 'React') {
@@ -17,7 +17,7 @@ module.exports.viewStocks = async (req, res) => {
   res.render("hospital/viewStocks", { hospital });
 };
 
-// Render update stock form with current values
+
 module.exports.renderUpdateStock = async (req, res) => {
   const hospital = await Hospital.findById(req.user.refId);
   if (req.headers['x-client'] === 'React') {
@@ -26,7 +26,7 @@ module.exports.renderUpdateStock = async (req, res) => {
   res.render("hospital/updateStock", { hospital, bloodTypes });
 };
 
-// Handle update stock submission
+
 module.exports.updateStock = async (req, res) => { 
   const { bloodGroup, units } = req.body;
   const hospital = await Hospital.findById(req.user.refId);
@@ -63,7 +63,7 @@ module.exports.createEmergency = async (req, res) => {
   const hospital = await Hospital.findById(req.user.refId);
   if (!hospital) {
     console.log("❌ Hospital not found");
-    return res.status(404).send("Hospital not found"); // ✅ return so no further execution
+    return res.status(404).send("Hospital not found"); 
   }
 
   const emergency = new Emergency({
@@ -76,7 +76,6 @@ module.exports.createEmergency = async (req, res) => {
 
   console.log("🆘 Emergency object prepared (not saved yet)");
 
-  // Find donors within 5km
   const nearbyDonors = await Donor.find({
     location: {
       $geoWithin: {
@@ -87,7 +86,7 @@ module.exports.createEmergency = async (req, res) => {
     active: true,
   });
 
-  // Find hospitals within 5km (excluding current hospital)
+ 
   const nearbyHospitals = await Hospital.find({
     _id: { $ne: hospital._id },
     location: {
@@ -104,7 +103,7 @@ module.exports.createEmergency = async (req, res) => {
   emergency.donorsNotified = nearbyDonors.map((d) => d._id);
   emergency.hospitalsNotified = nearbyHospitals.map((h) => h._id);
 
-  // Create Notification entries
+
   const notifications = [
     ...nearbyDonors.map((d) => ({
       recipientType: "Donor",
@@ -124,7 +123,6 @@ module.exports.createEmergency = async (req, res) => {
   await emergency.save();
   console.log("💾 Emergency saved with notifications");
 
-  // ✅ Always send only ONE response
   if (req.headers['x-client'] === 'React') {
     return res.json({
       success: true,
@@ -169,7 +167,7 @@ module.exports.renderBloodCampForm = async (req, res) => {
   const hospitalId = req.user.refId;
   const hospital = await Hospital.findById(hospitalId);
 
-  // Default hospital coordinates
+ 
   const hospitalLat = hospital.location.coordinates[1];
   const hospitalLng = hospital.location.coordinates[0];
 
@@ -215,21 +213,21 @@ module.exports.createBloodCamp = async (req, res) => {
 module.exports.addDonation = async (req, res) => {
   try {
     const { aadhar, bloodGroup, units } = req.body;
-    const hospitalId = req.user.refId; // logged-in hospital
+    const hospitalId = req.user.refId; 
 
     if (!aadhar || !bloodGroup) {
       console.log("Aadhar and blood group are required");
       return res.redirect("/hospital/donations");
     }
 
-    // 1️⃣ Find donor if exists
+  
     const donor = await Donor.findOne({ aadhar });
 
-    // 2️⃣ Update or create donation record
+   
     let donation = await Donation.findOne({ aadhar });
 
     if (donation) {
-      // Update existing donation
+      
       donation.totalDonations += Number(units);
       donation.lastDonationDate = new Date();
       donation.donationHistory.push({
@@ -238,14 +236,13 @@ module.exports.addDonation = async (req, res) => {
         bloodGroup,
       });
 
-      // If donor exists and donor field is empty, fill it
       if (donor && !donation.donor) {
         donation.donor = donor._id;
       }
 
       await donation.save();
     } else {
-      // First donation for this Aadhar
+      
       donation = new Donation({
         aadhar,
         donor: donor ? donor._id : undefined,
@@ -256,7 +253,6 @@ module.exports.addDonation = async (req, res) => {
       await donation.save();
     }
 
-    // 3️⃣ Update hospital blood stock
     const hospital = await Hospital.findById(hospitalId);
     let stock = hospital.bloodStock.find(s => s.bloodGroup === bloodGroup);
 
@@ -282,7 +278,6 @@ module.exports.addDonation = async (req, res) => {
   }
 };
 
-// List all donations (Hospital side)
 module.exports.listDonations = async (req, res) => {
   try {
     const donations = await Donation.find()

@@ -7,7 +7,6 @@ const BloodCamp = require("../models/Blood_camp");
 
 
 module.exports.dashboard = async (req, res) => {
-  // Redirect to comprehensive dashboard
   res.redirect("/donor/donordash");
 };
 
@@ -55,7 +54,7 @@ module.exports.updateLocation = async (req, res) => {
 
 module.exports.donorHistory = async (req, res) => {
   try {
-    const donorId = req.user.refId; // from Auth model
+    const donorId = req.user.refId; 
     const donor = await Donor.findById(donorId);
 
     const donation = await Donation.findOne({ donor: donorId })
@@ -100,11 +99,11 @@ module.exports.getDonorRequests = async (req, res) => {
 
 
 
-// Accept / Reject a notification
+
 module.exports.updateNotificationStatus = async (req, res, next) => {
   try {
-    const { id } = req.params; // notification ID
-    const { action } = req.body; // "accept" or "reject"
+    const { id } = req.params;
+    const { action } = req.body; 
 
     const notification = await Notification.findById(id).populate("emergency");
     if (!notification) return res.status(404).json({ error: "Notification not found" });
@@ -113,12 +112,10 @@ module.exports.updateNotificationStatus = async (req, res, next) => {
       notification.status = "Accepted";
       notification.sentAt = new Date();
 
-      // mark emergency fulfilled
       await Emergency.findByIdAndUpdate(notification.emergency._id, {
         fulfilled: true,
       });
 
-      // reject all other notifications for same emergency
       await Notification.updateMany(
         {
           emergency: notification.emergency._id,
@@ -150,7 +147,7 @@ module.exports.updateNotificationStatus = async (req, res, next) => {
 
 module.exports.getNotifications = async (req, res) => {
   try {
-    const donorId = req.user.refId; // assuming donor logged in
+    const donorId = req.user.refId; 
     console.log("Fetching notifications for donor:", donorId);
     const notifications = await BloodCampNotification.find({ donor: donorId })
       .populate("camp")
@@ -189,7 +186,7 @@ module.exports.getEligibility = async (req, res) => {
       const now = new Date();
       const diffTime = Math.abs(now - lastDonationDate);
       daysSinceLastDonation = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      // Eligibility: at least 90 days since last donation
+  
       isEligible = daysSinceLastDonation >= 90;
     }
 
@@ -209,7 +206,6 @@ module.exports.getDonorDash = async (req, res) => {
     const donor = await Donor.findById(donorId);
     const donation = await Donation.findOne({ donor: donorId }).populate("donationHistory.hospital");
 
-    // Eligibility calculation
     let totalDonations = 0;
     let daysSinceLastDonation = "N/A";
     let isEligible = true;
@@ -224,7 +220,7 @@ module.exports.getDonorDash = async (req, res) => {
       }
     }
 
-    // Requests
+
     const requests = await Notification.find({
       recipientType: "Donor",
       recipientId: donorId,
@@ -236,7 +232,7 @@ module.exports.getDonorDash = async (req, res) => {
         populate: { path: "hospital", select: "name" },
       });
 
-    // Camps
+
     const camps = await BloodCamp.find({}).sort({ date: 1 });
 
     if (req.headers['x-client'] === 'React') {
@@ -265,7 +261,7 @@ module.exports.getDonorDash = async (req, res) => {
   }
 };
 
-// this function will be triggered by cron, not exposed as route
+
 module.exports.generateNotifications = async () => {
   try {
     const today = new Date();
@@ -280,7 +276,7 @@ module.exports.generateNotifications = async () => {
     });
     console.log("Camps found for notification:", camps.length);
     for (let camp of camps) {
-      // find donors within 10 km
+ 
       const donors = await Donor.find({
         location: {
           $near: {
