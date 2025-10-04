@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const donationSchema = new mongoose.Schema({
-  donor: { type: mongoose.Schema.Types.ObjectId, ref: 'Donor' }, // not required
-  aadhar: { type: String, unique: true, required: true },        // compulsory
+  donor: { type: mongoose.Schema.Types.ObjectId, ref: 'Donor' },
+  aadhar: { type: String, unique: true, required: true },        
   totalDonations: { type: Number, default: 0 },
   lastDonationDate: { type: Date },
   donationHistory: [

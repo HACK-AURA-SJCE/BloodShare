@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 const Hospital = require('./Hospital');
 
 const bloodCampSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // e.g., "City Center Blood Camp"
-  organizer: { type: String }, // hospital or NGO organizing the camp
+  name: { type: String, required: true }, 
+  organizer: { type: String },
   Hospital: { type: mongoose.Schema.Types.ObjectId, ref: 'Hospital', required: true },
   address: { type: String, required: true },
   location: {
     type: { type: String, default: 'Point' },
-    coordinates: [Number], // [longitude, latitude]
+    coordinates: [Number],
   },
   date: { type: Date, required: true },
   timeFrom: { type: String, required: true },

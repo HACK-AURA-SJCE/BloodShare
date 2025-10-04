@@ -10,13 +10,13 @@ const donorSchema = new mongoose.Schema({
   // Current location (for real-time use/emergencies)
   location: {
     type: { type: String, default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] }, // [lng, lat]
+    coordinates: { type: [Number], default: [0, 0] },
   },
 
-  // Permanent location (picked on signup)
+  
   permanentLocation: {
     type: { type: String, default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] }, // [lng, lat]
+    coordinates: { type: [Number], default: [0, 0] }, 
   },
 
   active: { type: Boolean, default: true },

@@ -6,7 +6,7 @@ const hospitalSchema = new mongoose.Schema({
   mobile: { type: String, required: true },
    location: {
     type: { type: String, default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] } // [longitude, latitude]
+    coordinates: { type: [Number], default: [0, 0] }
   },
   bloodStock: [
     {
