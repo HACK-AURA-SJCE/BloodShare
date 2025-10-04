@@ -1,36 +1,47 @@
-<<<<<<< HEAD
-# React + Vite
+# 🩸 BloodShare – Connecting Lives Through Blood Donation  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BloodShare is a web-based platform designed to connect blood donors, recipients, and hospitals in real time. It simplifies the process of finding and requesting blood, especially during emergencies, ensuring that no life is lost due to delays.  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features  
 
-## React Compiler
+- 🔍 **Smart Donor Search** – Find nearby donors using geolocation-based matching.  
+- 🏥 **Hospital Integration** – Hospitals can post emergency requests and manage blood inventories.  
+- 👤 **User Profiles** – Donors and recipients can manage their medical & contact information securely.  
+- 📢 **Emergency Alerts** – Quick broadcast of urgent requests to all compatible donors.  
+- 📊 **Donation Tracking** – Keep a record of donation history and impact.  
+- 🖥️ **Modern UI** – Clean and intuitive interface for a smooth user experience.  
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🌍 Impact  
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-🩸 Blood Stock Management System
+- ⏱️ **Faster Response Times** – Reduces the time to find a suitable donor in critical situations.  
+- 💉 **Increased Donations** – Encourages community participation by making donation easier and more transparent.  
+- 🏥 **Hospital Efficiency** – Helps hospitals manage blood requests and availability better.  
+- ❤️ **Saving Lives** – Ultimately contributes to reducing preventable deaths due to blood shortages.  
 
-A full-stack web application designed to help hospitals, blood banks, and donors manage blood donations, track stock availability, and ensure timely access to life-saving resources.
+---
 
-🚀 Features
+## 🛠️ Tech Stack  
 
-🔐 Authentication – Secure login/signup for hospitals & donors
+- **Frontend**: React.js, TailwindCSS  
+- **Backend**: Node.js, Express.js  
+- **Database**: MongoDB  
+- **Authentication**: JWT-based secure login  
+- **APIs**: Google Maps / Geolocation API for donor-hospital matching  
 
-🏥 Hospital Dashboard – Manage stock levels, view requests, update availability
+---
 
-🧑‍🤝‍🧑 Donor Dashboard – Register, donate blood, and track donation history
+## ⚙️ Installation & Setup  
 
-📊 Stock Monitoring – Real-time tracking of blood availability & expiry dates
+### 1. Clone the Repository  
+```bash
+git clone https://github.com/HACK-AURA-SJCE/BloodShare.git
+npm install
+node app.js
 
-📜 Donation Records – Stores donation details for future reference
-
-📡 Notifications – Alerts for shortages & donor requirements
->>>>>>> 48d2f9fa63323d1331858e9bb5ed8b65a5ec9070
+###New Terminal
+cd frontend
+npm install
