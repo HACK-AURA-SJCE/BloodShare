@@ -26,9 +26,9 @@ async function linkPastDonations(aadhar, donorId) {
 module.exports.signup = async (req, res, next) => {
   const {
     name, email, mobile, password, role,
-    bloodGroup, aadhar,
+    bloodGroup, aadhar, permanentAddress,
     permanentLat, permanentLng,
-    hospitalLat, hospitalLng
+    hospitalAddress, hospitalLat, hospitalLng
   } = req.body;
 
   let newUser;
@@ -41,15 +41,16 @@ module.exports.signup = async (req, res, next) => {
         mobile,
         bloodGroup,
         aadhar,
+        permanentAddress,
         permanentLocation: {
           type: "Point",
-          coordinates: [parseFloat(permanentLng), parseFloat(permanentLat)]
+          coordinates: [parseFloat(permanentLng) || 0, parseFloat(permanentLat) || 0]
         }
       });
 
       await newUser.save();
 
-      
+
       await linkPastDonations(aadhar, newUser._id);
 
     } else if (role === "Hospital") {
@@ -57,9 +58,10 @@ module.exports.signup = async (req, res, next) => {
         name,
         email,
         mobile,
+        hospitalAddress,
         location: {
           type: "Point",
-          coordinates: [parseFloat(hospitalLng), parseFloat(hospitalLat)]
+          coordinates: [parseFloat(hospitalLng) || 0, parseFloat(hospitalLat) || 0]
         }
       });
 
@@ -73,7 +75,7 @@ module.exports.signup = async (req, res, next) => {
     req.login(registeredUser, (err) => {
       if (err) return next(err);
       if (req.headers['x-client'] === 'React') {
-        return res.json({ success: true, user: { role, email } });
+        return res.json({ success: true, user: { role, email }, profile: newUser });
       } else {
         if (role === "Donor") return res.redirect("/donor/dashboard");
         else return res.redirect("/hospital/dashboard");
@@ -82,6 +84,9 @@ module.exports.signup = async (req, res, next) => {
 
   } catch (err) {
     console.error("Signup Error:", err);
+    if (req.headers['x-client'] === 'React') {
+      return res.status(500).json({ success: false, error: "Error creating account. Please try again." });
+    }
     return res.render("signup", { error: "Error creating account. Please try again." });
   }
 };
@@ -150,7 +155,7 @@ module.exports.me = async (req, res) => {
     } else if (role === 'Hospital') {
       profile = await require('../models/Hospital').findById(refId);
     }
-  } catch (e) {}
+  } catch (e) { }
   return res.json({ authenticated: true, user: { email, role }, profile });
 };
 

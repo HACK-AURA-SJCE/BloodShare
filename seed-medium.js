@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const faker = require("faker");
+const bcrypt = require("bcryptjs");
+
 const Auth = require("./models/Auth");
 const Donor = require("./models/Donor");
 const Hospital = require("./models/Hospital");
@@ -54,16 +56,16 @@ async function seed() {
     ]);
     console.log("🧹 Cleared old data");
 
-    // --- Hospitals (4 clusters × 4 hospitals = 16 hospitals) ---
+    // --- Hospitals ---
     const hospitals = [];
     clusterCenters.forEach((cluster, idx) => {
       for (let i = 0; i < 4; i++) {
-        const coords = randomPoint(cluster.coords, 6); // 6 km radius
+        const coords = randomPoint(cluster.coords, 6);
         hospitals.push({
           name: `${cluster.name} Hospital ${i + 1}`,
           email: `hospital${idx}${i}@example.com`,
           mobile: "90000" + (1000 + i + idx * 10),
-          location: { type: "Point", coordinates: [coords[1], coords[0]] }, // [lng, lat]
+          location: { type: "Point", coordinates: [coords[1], coords[0]] },
           bloodStock: bloodGroups.map(bg => ({
             bloodGroup: bg,
             units: faker.datatype.number({ min: 10, max: 80 }),
@@ -74,11 +76,11 @@ async function seed() {
     const hospitalDocs = await Hospital.insertMany(hospitals);
     console.log(`✅ Created ${hospitalDocs.length} hospitals`);
 
-    // --- Donors (150 donors distributed across clusters) ---
+    // --- Donors ---
     const donors = [];
     for (let i = 0; i < 150; i++) {
       const cluster = faker.random.arrayElement(clusterCenters);
-      const coords = randomPoint(cluster.coords, 8); // 8 km radius
+      const coords = randomPoint(cluster.coords, 8);
       donors.push({
         name: faker.name.findName(),
         email: `donor${i}@example.com`,
@@ -93,15 +95,22 @@ async function seed() {
     const donorDocs = await Donor.insertMany(donors);
     console.log(`✅ Created ${donorDocs.length} donors`);
 
-    // --- Auth users ---
-    const authUsers = [
-      ...hospitalDocs.map(h => ({ email: h.email, role: "Hospital", refId: h._id })),
-      ...donorDocs.map(d => ({ email: d.email, role: "Donor", refId: d._id })),
-    ];
+    // --- Auth users with proper password hashing ---
+    const authUsers = [];
+    for (const h of hospitalDocs) {
+      const authUser = new Auth({ email: h.email, role: "Hospital", refId: h._id });
+      await authUser.setPassword("password123");
+      authUsers.push(authUser);
+    }
+    for (const d of donorDocs) {
+      const authUser = new Auth({ email: d.email, role: "Donor", refId: d._id });
+      await authUser.setPassword("password123");
+      authUsers.push(authUser);
+    }
     await Auth.insertMany(authUsers);
-    console.log(`✅ Created ${authUsers.length} auth users`);
+    console.log(`✅ Created ${authUsers.length} auth users (password = "password123")`);
 
-    // --- Donations (2-3 history per donor) ---
+    // --- Donations ---
     const donations = [];
     for (const donor of donorDocs) {
       const donationCount = faker.datatype.number({ min: 2, max: 3 });
@@ -113,7 +122,7 @@ async function seed() {
           hospital: hospital._id,
           units: faker.datatype.number({ min: 1, max: 2 }),
           bloodGroup: donor.bloodGroup,
-          date: faker.date.past(2), // Past 2 years
+          date: faker.date.past(2),
         });
       }
 
@@ -128,13 +137,12 @@ async function seed() {
     await Donation.insertMany(donations);
     console.log(`✅ Created ${donations.length} donation records`);
 
-    // --- Blood Camps (2-3 per hospital) with better donor distribution ---
+    // --- Blood Camps ---
     const camps = [];
     for (const hospital of hospitalDocs) {
       const campCount = faker.datatype.number({ min: 2, max: 3 });
 
       for (let i = 0; i < campCount; i++) {
-        // Find nearby donors for this camp (within 8km for better coverage)
         const nearbyDonors = await Donor.find({
           location: {
             $geoWithin: {
@@ -142,7 +150,7 @@ async function seed() {
             },
           },
           active: true,
-        }).limit(15); // Limit to 15 donors per camp
+        }).limit(15);
 
         camps.push({
           name: `${hospital.name} Blood Camp ${i + 1}`,
@@ -150,7 +158,7 @@ async function seed() {
           Hospital: hospital._id,
           address: faker.address.streetAddress(),
           location: hospital.location,
-          date: faker.date.future(1), // Next year
+          date: faker.date.future(1),
           timeFrom: faker.random.arrayElement(["09:00 AM", "10:00 AM", "11:00 AM"]),
           timeTo: faker.random.arrayElement(["03:00 PM", "04:00 PM", "05:00 PM"]),
           donorsNotified: nearbyDonors.map(d => d._id),
@@ -160,14 +168,14 @@ async function seed() {
     const campDocs = await BloodCamp.insertMany(camps);
     console.log(`✅ Created ${campDocs.length} blood camps`);
 
-    // --- Create additional camps to ensure each donor sees 2-3 camps ---
+    // --- Extra Camps ---
     const additionalCamps = [];
-    for (let i = 0; i < 40; i++) { // Create 40 additional camps
+    for (let i = 0; i < 40; i++) {
       const hospital = faker.random.arrayElement(hospitalDocs);
       const nearbyDonors = await Donor.find({
         location: {
           $geoWithin: {
-            $centerSphere: [hospital.location.coordinates, 12 / 6378.1], // 12km radius
+            $centerSphere: [hospital.location.coordinates, 12 / 6378.1],
           },
         },
         active: true,
@@ -204,15 +212,13 @@ async function seed() {
     await BloodCampNotification.insertMany(campNotifs);
     console.log(`✅ Created ${campNotifs.length} blood camp notifications`);
 
-    // --- Emergencies (1-3 per hospital) ---
+    // --- Emergencies ---
     const emergencies = [];
     for (const hospital of hospitalDocs) {
       const emergencyCount = faker.datatype.number({ min: 1, max: 3 });
 
       for (let i = 0; i < emergencyCount; i++) {
         const bloodGroup = faker.random.arrayElement(bloodGroups);
-
-        // Find nearby donors with matching blood group
         const nearbyDonors = await Donor.find({
           location: {
             $geoWithin: {
@@ -223,7 +229,6 @@ async function seed() {
           active: true,
         });
 
-        // Find nearby hospitals
         const nearbyHospitals = await Hospital.find({
           _id: { $ne: hospital._id },
           location: {
@@ -246,7 +251,6 @@ async function seed() {
 
         const emergencyDoc = await Emergency.create(emergency);
 
-        // Create notifications with messages
         const notifications = [
           ...nearbyDonors.map((d) => ({
             recipientType: "Donor",
@@ -273,9 +277,9 @@ async function seed() {
     }
     console.log(`✅ Created ${emergencies.length} emergencies`);
 
-    // --- Ensure each hospital has 3-5 donations displayed ---
+    // --- Hospital Donations ---
     const hospitalDonations = [];
-    let uniqueAadharCounter = 200000000000; // Start from a different range
+    let uniqueAadharCounter = 200000000000;
 
     for (const hospital of hospitalDocs) {
       const donationCount = faker.datatype.number({ min: 3, max: 5 });
@@ -284,9 +288,8 @@ async function seed() {
         const bloodGroup = faker.random.arrayElement(bloodGroups);
         const uniqueAadhar = String(uniqueAadharCounter++);
 
-        // Create a new donation record specifically for this hospital
         const newDonation = await Donation.create({
-          donor: null, // No specific donor for hospital display
+          donor: null,
           aadhar: uniqueAadhar,
           totalDonations: faker.datatype.number({ min: 1, max: 3 }),
           lastDonationDate: faker.date.past(1),
@@ -311,6 +314,7 @@ async function seed() {
     console.log(`   - Emergencies: ${emergencies.length}`);
     console.log(`   - Total Notifications: ${await Notification.countDocuments()}`);
     console.log(`   - Total Donations: ${await Donation.countDocuments()}`);
+    console.log(`   - Default Login Password: "password123"`);
 
     process.exit();
   } catch (err) {

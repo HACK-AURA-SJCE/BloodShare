@@ -4,7 +4,8 @@ const hospitalSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   mobile: { type: String, required: true },
-   location: {
+  hospitalAddress: { type: String },
+  location: {
     type: { type: String, default: 'Point' },
     coordinates: { type: [Number], default: [0, 0] }
   },

@@ -6,7 +6,7 @@ import { useNotifications } from '../context/NotificationContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setUser } = useAuth();
   const { addNotification } = useNotifications();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch('http://localhost:1000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-client': 'React' },
         credentials: 'include',
@@ -41,7 +41,7 @@ const LoginPage = () => {
         return;
       }
 
-      login({ ...data.user, profile: data.profile }, data.user.role.toLowerCase());
+      setUser(data.user);
       addNotification({ type: 'success', message: `Welcome back, ${data.user.role}!` });
 
       if (data.user.role === 'Donor') navigate('/donor/dashboard');

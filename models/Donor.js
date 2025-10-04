@@ -6,6 +6,7 @@ const donorSchema = new mongoose.Schema({
   mobile: { type: String, required: true, unique: true },
   bloodGroup: { type: String, required: true },
   aadhar: { type: String, unique: true },
+  permanentAddress: { type: String },
 
   // Current location (for real-time use/emergencies)
   location: {
@@ -13,10 +14,10 @@ const donorSchema = new mongoose.Schema({
     coordinates: { type: [Number], default: [0, 0] },
   },
 
-  
+
   permanentLocation: {
     type: { type: String, default: 'Point' },
-    coordinates: { type: [Number], default: [0, 0] }, 
+    coordinates: { type: [Number], default: [0, 0] },
   },
 
   active: { type: Boolean, default: true },
