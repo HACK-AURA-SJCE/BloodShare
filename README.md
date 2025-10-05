@@ -41,6 +41,11 @@ BloodShare is a web-based platform designed to connect blood donors, recipients,
 ###Terminal
 git clone https://github.com/HACK-AURA-SJCE/BloodShare.git
 npm install
+
+##For dummy data
+node seed-medium.js  
+
+##New Terminal
 node app.js
 
 ###New Terminal
